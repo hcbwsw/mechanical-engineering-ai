@@ -2,6 +2,33 @@
 
 本目录是「课程级整包」：**FastAPI 后端** + **静态前端页** + **测试/演示数据** + **文档**。与同级 **`mechanical-ai-platform`**（另一套更小骨架）相互独立。
 
+## 界面预览
+
+README 里**可以**放前端截图：把图片放进本仓库（例如 `docs/screenshots/`），用**相对路径**引用即可，GitHub 会直接在仓库首页渲染。
+
+**建议**：用 **PNG / JPG**，文件名尽量**英文**（如 `unified-hub.png`），避免少数工具对路径编码不友好。截图分辨率宽度约 **1200～1600px** 在网页上较清晰；若单张很大，可压缩后再提交以控制仓库体积。
+
+将文件保存到 `docs/screenshots/` 下后，与下表文件名一致即可显示；也可改名，并同步修改下面 Markdown 中的路径。
+
+| 截图文件（示例） | 说明 |
+|------------------|------|
+| `docs/screenshots/unified-hub.png` | 统一入口 **Unified Application Hub** |
+| `docs/screenshots/openapi-docs.png` | **Swagger** `/docs` 接口文档 |
+| `docs/screenshots/dashboard.png` | 诊断看板 **Mechanical Engineering AI Dashboard** |
+
+示例写法（复制到 README 任意位置均可）：
+
+```markdown
+![统一入口 Hub](docs/screenshots/unified-hub.png)
+![OpenAPI 文档](docs/screenshots/openapi-docs.png)
+```
+
+添加截图文件并 `git push` 后，下列引用会显示为图片（文件尚不存在时 GitHub 上会显示裂图，可忽略直至你补全 PNG）：
+
+![统一入口 Hub](docs/screenshots/unified-hub.png)
+
+![OpenAPI /docs](docs/screenshots/openapi-docs.png)
+
 ---
 
 ## 推荐目录结构（当前）
@@ -22,6 +49,7 @@
 ├── .env.docker.example       # Compose 环境变量示例
 │
 ├── docs/                     # 📄 说明文档（原根目录散落 .md 已归集）
+│   ├── screenshots/          # 📷 README 界面截图（PNG/JPG，见上文「界面预览」）
 │   ├── COMPLETE_PROJECT_INTEGRATION.md
 │   ├── 测试指南.md
 │   └── 演示测试快速指南.md
