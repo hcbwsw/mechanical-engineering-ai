@@ -62,7 +62,7 @@ GitHub 渲染 README 里的图片时，需满足：**图片文件已提交到当
 ├── postman/                  # 📮 Postman 集合（JSON，导入 Postman/Apifox）
 │   └── Mechanical-Engineering-AI-System.postman_collection.json
 │
-├── 前端/                     # 🖥 静态 HTML（见 前端/README.md；部署见 docs/DEPLOYMENT_GUIDE.md）
+├── 前端/                     # 🖥 静态 HTML（入口 Unified Application Hub.html；部署见 docs/DEPLOYMENT_GUIDE.md）
 │   ├── Unified Application Hub.html    # 统一入口（卡片打开各子页）
 │   ├── Mechanical Engineering AI Dashboard.html
 │   ├── Knowledge Base Search Frontend.html
