@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分析仪表板</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .chart-container { position: relative; height: 300px; }
+        .pulse-animation { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 min-h-screen">
+    <div class="p-8">
+        <div class="max-w-7xl mx-auto">
+            <!-- 头部 -->
+            <div class="flex justify-between items-center mb-12">
+                <div>
+                    <h1 class="text-4xl font-bold text-white mb-2">
+                        <i class="fas fa-chart-line mr-3 text-green-400"></i>实时分析仪表板
+                    </h1>
+                    <p class="text-gray-400">诊断系统性能监控与数据分析</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-sm text-gray-400 mb-2">更新时间</div>
+                    <div id="currentTime" class="text-xl font-bold text-green-400">2026-03-22 16:30:45</div>
+                </div>
+            </div>
+
+            <!-- 关键指标 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+                <div class="bg-slate-800 rounded-lg shadow-xl p-6 border border-slate-700">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="text-gray-400 text-sm">系统状态</div>
+                        <div class="pulse-animation text-green-500"><i class="fas fa-circle text-xl"></i></div>
+                    </div>
+                    <div class="text-3xl font-bold text-white">正常</div>
+                    <div class="text-gray-400 text-xs mt-2">运行时间: 99.9%</div>
+                </div>
+
+                <div class="bg-slate-800 rounded-lg shadow-xl p-6 border border-slate-700">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="text-gray-400 text-sm">今日诊断</div>
+                        <i class="fas fa-check-circle text-blue-400 text-2xl"></i>
+                    </div>
+                    <div class="text-3xl font-bold text-white">247</div>
+                    <div class="text-gray-400 text-xs mt-2">↑ 12% vs 昨天</div>
+                </div>
+
+                <div class="bg-slate-800 rounded-lg shadow-xl p-6 border border-slate-700">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="text-gray-400 text-sm">平均精准度</div>
+                        <i class="fas fa-bullseye text-purple-400 text-2xl"></i>
+                    </div>
+                    <div class="text-3xl font-bold text-white">94.7%</div>
+                    <div class="text-gray-400 text-xs mt-2">基于2547次诊断</div>
+                </div>
+
+                <div class="bg-slate-800 rounded-lg shadow-xl p-6 border border-slate-700">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="text-gray-400 text-sm">响应时间</div>
+                        <i class="fas fa-tachometer-alt text-green-400 text-2xl"></i>
+                    </div>
+                    <div class="text-3xl font-bold text-white">186ms</div>
+                    <div class="text-gray-400 text-xs mt-2">平均处理时间</div>
+                </div>
+
+                <div class="bg-slate-800 rounded-lg shadow-xl p-6 border border-slate-700">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="text-gray-400 text-sm">活跃用户</div>
+                        <i class="fas fa-users text-yellow-400 text-2xl"></i>
+                    </div>
+                    <div class="text-3xl font-bold text-white">1,248</div>
+                    <div class="text-gray-400 text-xs mt-2">本周新增: 89</div>
+                </div>
+            </div>
+
+            <!-- 主要图表 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <!-- 诊断趋势 -->
+                <div class="bg-slate-800 rounded-lg shadow-xl p-6 border border-slate-700">
+                    <h2 class="text-xl font-bold text-white mb-6">
+                        <i class="fas fa-chart-line mr-2 text-blue-400"></i>诊断趋势 (最近7天)
+                    </h2>
+                    <div class="chart-container">
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- 诊断结果分布 -->
+                <div class="bg-slate-800 rounded-lg shadow-xl p-6 border border-slate-700">
+                    <h2 class="text-xl font-bold text-white mb-6">
+                        <i class="fas fa-pie-chart mr-2 text-purple-400"></i>诊断结果分布
+                    </h2>
+                    <div class="chart-container">
+                        <canvas id="resultChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- 设备类型分析 -->
+                <div class="bg-slate-800 rounded-lg shadow-xl p-6 border border-slate-700">
+                    <h2 class="text-xl font-bold text-white mb-6">
+                        <i class="fas fa-cogs mr-2 text-green-400"></i>设备类型分析
+                    </h2>
+                    <div class="chart-container">
+                        <canvas id="equipmentChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- 故障率对比 -->
+                <div class="bg-slate-800 rounded-lg shadow-xl p-6 border border-slate-700">
+                    <h2 class="text-xl font-bold text-white mb-6">
+                        <i class="fas fa-exclamation-triangle mr-2 text-red-400"></i>故障率对比
+                    </h2>
+                    <div class="chart-container">
+                        <canvas id="faultChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 顶部告警与优化建议 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <!-- 告警列表 -->
+                <div class="bg-slate-800 rounded-lg shadow-xl p-6 border border-slate-700">
+                    <h2 class="text-xl font-bold text-white mb-6">
+                        <i class="fas fa-bell mr-2 text-red-400"></i>活跃告警
+                    </h2>
+                    <div class="space-y-4">
+                        <div class="bg-slate-700 rounded-lg p-4 border-l-4 border-red-500">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <div class="text-white font-semibold">轴承C温度异常</div>
+                                    <div class="text-gray-400 text-sm">设备异常升温到78°C</div>
+                                </div>
+                                <span class="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold">紧急</span>
+                            </div>
+                            <div class="text-gray-400 text-xs mt-2">发生于2小时前</div>
+                        </div>
+
+                        <div class="bg-slate-700 rounded-lg p-4 border-l-4 border-yellow-500">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <div class="text-white font-semibold">泵密封压力低</div>
+                                    <div class="text-gray-400 text-sm">压力低于标准值15%</div>
+                                </div>
+                                <span class="bg-yellow-600 text-white px-2 py-1 rounded text-xs font-semibold">警告</span>
+                            </div>
+                            <div class="text-gray-400 text-xs mt-2">发生于5小时前</div>
+                        </div>
+
+                        <div class="bg-slate-700 rounded-lg p-4 border-l-4 border-blue-500">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <div class="text-white font-semibold">电机绝缘老化</div>
+                                    <div class="text-gray-400 text-sm">绝缘等级下降检测</div>
+                                </div>
+                                <span class="bg-blue-600 text-white px-2 py-1 rounded text-xs font-semibold">提示</span>
+                            </div>
+                            <div class="text-gray-400 text-xs mt-2">发生于1天前</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 优化建议 -->
+                <div class="bg-slate-800 rounded-lg shadow-xl p-6 border border-slate-700">
+                    <h2 class="text-xl font-bold text-white mb-6">
+                        <i class="fas fa-lightbulb mr-2 text-yellow-400"></i>系统优化建议
+                    </h2>
+                    <div class="space-y-4">
+                        <div class="bg-slate-700 rounded-lg p-4">
+                            <div class="flex items-start">
+                                <i class="fas fa-star text-yellow-400 mr-3 mt-1"></i>
+                                <div>
+                                    <div class="text-white font-semibold">提升诊断频率</div>
+                                    <div class="text-gray-400 text-sm">建议将关键设备诊断间隔从4小时改为2小时</div>
+                                    <button class="mt-2 text-blue-400 hover:text-blue-300 text-sm font-semibold">应用建议 →</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-700 rounded-lg p-4">
+                            <div class="flex items-start">
+                                <i class="fas fa-star text-yellow-400 mr-3 mt-1"></i>
+                                <div>
+                                    <div class="text-white font-semibold">更新模型参数</div>
+                                    <div class="text-gray-400 text-sm">AI模型已有最新版本，可提升准确率到96%+</div>
+                                    <button class="mt-2 text-blue-400 hover:text-blue-300 text-sm font-semibold">更新现在 →</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-700 rounded-lg p-4">
+                            <div class="flex items-start">
+                                <i class="fas fa-star text-yellow-400 mr-3 mt-1"></i>
+                                <div>
+                                    <div class="text-white font-semibold">优化缓存策略</div>
+                                    <div class="text-gray-400 text-sm">调整缓存可将响应时间从186ms降至120ms</div>
+                                    <button class="mt-2 text-blue-400 hover:text-blue-300 text-sm font-semibold">配置缓存 →</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 性能详情 -->
+            <div class="bg-slate-800 rounded-lg shadow-xl p-6 border border-slate-700 mb-8">
+                <h2 class="text-xl font-bold text-white mb-6">
+                    <i class="fas fa-server mr-2 text-cyan-400"></i>系统性能指标
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-gray-400">CPU使用率</span>
+                            <span class="text-white font-bold">42%</span>
+                        </div>
+                        <div class="w-full bg-slate-700 rounded-full h-2">
+                            <div class="bg-green-500 h-2 rounded-full" style="width: 42%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-gray-400">内存使用率</span>
+                            <span class="text-white font-bold">68%</span>
+                        </div>
+                        <div class="w-full bg-slate-700 rounded-full h-2">
+                            <div class="bg-yellow-500 h-2 rounded-full" style="width: 68%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-gray-400">磁盘使用率</span>
+                            <span class="text-white font-bold">81%</span>
+                        </div>
+                        <div class="w-full bg-slate-700 rounded-full h-2">
+                            <div class="bg-orange-500 h-2 rounded-full" style="width: 81%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-slate-700">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                        <div>
+                            <div class="text-2xl font-bold text-blue-400 mb-1">18,742</div>
+                            <div class="text-gray-400 text-sm">数据库连接</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold text-purple-400 mb-1">512MB</div>
+                            <div class="text-gray-400 text-sm">缓存大小</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold text-green-400 mb-1">99.98%</div>
+                            <div class="text-gray-400 text-sm">可用性SLA</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold text-cyan-400 mb-1">4.2M</div>
+                            <div class="text-gray-400 text-sm">API请求/天</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 底部导出按钮 -->
+            <div class="flex gap-4 justify-center">
+                <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition flex items-center">
+                    <i class="fas fa-download mr-2"></i>导出报告 (PDF)
+                </button>
+                <button class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition flex items-center">
+                    <i class="fas fa-envelope mr-2"></i>发送到邮箱
+                </button>
+                <button class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-6 rounded-lg transition flex items-center">
+                    <i class="fas fa-redo mr-2"></i>刷新数据
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 实时时间更新
+        setInterval(() => {
+            const now = new Date();
+            const timeStr = now.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('currentTime').textContent = timeStr;
+        }, 1000);
+
+        // 诊断趋势图
+        const trendCtx = document.getElementById('trendChart').getContext('2d');
+        new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+                datasets: [{
+                    label: '诊断次数',
+                    data: [185, 210, 195, 240, 220, 260, 247],
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { labels: { color: '#ccc' } } },
+                scales: {
+                    y: { ticks: { color: '#999' }, grid: { color: '#444' } },
+                    x: { ticks: { color: '#999' }, grid: { color: '#444' } }
+                }
+            }
+        });
+
+        // 诊断结果分布图
+        const resultCtx = document.getElementById('resultChart').getContext('2d');
+        new Chart(resultCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['正常', '警告', '异常', '需维护'],
+                datasets: [{
+                    data: [2100, 320, 127, 50],
+                    backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#8b5cf6']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { labels: { color: '#ccc' } } }
+            }
+        });
+
+        // 设备类型分析
+        const equipmentCtx = document.getElementById('equipmentChart').getContext('2d');
+        new Chart(equipmentCtx, {
+            type: 'bar',
+            data: {
+                labels: ['轴承', '泵', '电机', '齿轮箱', '压缩机'],
+                datasets: [{
+                    label: '诊断次数',
+                    data: [520, 380, 450, 290, 210],
+                    backgroundColor: '#a78bfa'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { labels: { color: '#ccc' } } },
+                scales: {
+                    y: { ticks: { color: '#999' }, grid: { color: '#444' } },
+                    x: { ticks: { color: '#999' }, grid: { color: '#444' } }
+                }
+            }
+        });
+
+        // 故障率对比
+        const faultCtx = document.getElementById('faultChart').getContext('2d');
+        new Chart(faultCtx, {
+            type: 'bar',
+            data: {
+                labels: ['本周', '上周', '上上周', '本月平均'],
+                datasets: [{
+                    label: '故障率 (%)',
+                    data: [3.2, 4.1, 5.5, 4.3],
+                    backgroundColor: '#ef4444'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { labels: { color: '#ccc' } } },
+                scales: {
+                    y: { ticks: { color: '#999' }, grid: { color: '#444' } },
+                    x: { ticks: { color: '#999' }, grid: { color: '#444' } }
+                }
+            }
+        });
+    </script>
+<script>window.parent.postMessage({ action: "ready" }, "*"); 
+ 
+window.console = new Proxy(console, {
+  get(target, prop) {
+    if (['log', 'warn', 'error'].includes(prop)) {
+      return new Proxy(target[prop], {
+        apply(fn, thisArg, args) {
+          fn.apply(thisArg, args);
+          window.parent.postMessage({ action: 'console', 
+            type: prop, 
+            args: args.map((arg) => {
+              try {
+                return JSON.stringify(arg).replace(/^["']|["']$/g, '');
+              } catch (e) {
+                return arg;
+              }
+            }) 
+          }, '*');
+        }
+      });
+    }
+    return target[prop];
+  }
+});
+</script></body>
+</html>

@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户认证系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .login-container { animation: slideIn 0.5s ease-out; }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .success-animation {
+            animation: checkmark 0.6s ease-out forwards;
+        }
+        @keyframes checkmark {
+            0% { transform: scale(0); opacity: 0; }
+            70% { transform: scale(1.15); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 min-h-screen flex items-center justify-center px-4">
+    <!-- 登录/注册面板 -->
+    <div id="authPanel" class="w-full max-w-md">
+        <div class="login-container bg-slate-800 rounded-lg shadow-xl border border-slate-700 overflow-hidden">
+            <!-- 头部选项卡 -->
+            <div class="flex border-b border-slate-700 bg-slate-900">
+                <button id="loginTab" class="flex-1 py-4 px-6 font-semibold text-white border-b-2 border-purple-500 bg-slate-800 cursor-pointer transition">
+                    <i class="fas fa-sign-in-alt mr-2"></i>登录
+                </button>
+                <button id="registerTab" class="flex-1 py-4 px-6 font-semibold text-gray-400 border-b-2 border-transparent hover:text-white cursor-pointer transition">
+                    <i class="fas fa-user-plus mr-2"></i>注册
+                </button>
+            </div>
+
+            <!-- 登录表单 -->
+            <div id="loginForm" class="p-8">
+                <h2 class="text-2xl font-bold text-white mb-6 text-center">
+                    <i class="fas fa-robot text-purple-400 mr-2"></i>机械诊断系统
+                </h2>
+
+                <form id="loginFormElement" class="space-y-4">
+                    <div>
+                        <label class="block text-gray-300 font-semibold mb-2">
+                            <i class="fas fa-envelope mr-2"></i>邮箱地址
+                        </label>
+                        <input 
+                            type="email" 
+                            id="loginEmail"
+                            placeholder="example@company.com"
+                            class="w-full px-4 py-3 rounded-lg bg-slate-700 text-white border border-slate-600 focus:border-purple-500 focus:outline-none transition"
+                            required
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-300 font-semibold mb-2">
+                            <i class="fas fa-lock mr-2"></i>密码
+                        </label>
+                        <input 
+                            type="password" 
+                            id="loginPassword"
+                            placeholder="••••••••"
+                            class="w-full px-4 py-3 rounded-lg bg-slate-700 text-white border border-slate-600 focus:border-purple-500 focus:outline-none transition"
+                            required
+                        >
+                    </div>
+
+                    <div class="flex items-center justify-between text-sm">
+                        <label class="flex items-center text-gray-400">
+                            <input type="checkbox" id="rememberMe" class="mr-2 w-4 h-4">
+                            记住我
+                        </label>
+                        <a href="#" class="text-purple-400 hover:text-purple-300">忘记密码?</a>
+                    </div>
+
+                    <button 
+                        type="submit"
+                        class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg transition mt-6"
+                    >
+                        <i class="fas fa-sign-in-alt mr-2"></i>登录
+                    </button>
+
+                    <div class="relative my-6">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-slate-600"></div>
+                        </div>
+                        <div class="relative flex justify-center text-sm">
+                            <span class="px-2 bg-slate-800 text-gray-400">或继续使用</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <button type="button" class="bg-slate-700 hover:bg-slate-600 text-white font-semibold py-2 px-4 rounded-lg transition flex items-center justify-center">
+                            <i class="fab fa-google mr-2"></i>Google
+                        </button>
+                        <button type="button" class="bg-slate-700 hover:bg-slate-600 text-white font-semibold py-2 px-4 rounded-lg transition flex items-center justify-center">
+                            <i class="fab fa-github mr-2"></i>GitHub
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 注册表单 -->
+            <div id="registerForm" class="hidden p-8">
+                <h2 class="text-2xl font-bold text-white mb-6 text-center">
+                    创建新账户
+                </h2>
+
+                <form id="registerFormElement" class="space-y-4">
+                    <div>
+                        <label class="block text-gray-300 font-semibold mb-2">
+                            <i class="fas fa-user mr-2"></i>用户名
+                        </label>
+                        <input 
+                            type="text" 
+                            id="registerUsername"
+                            placeholder="输入用户名"
+                            class="w-full px-4 py-3 rounded-lg bg-slate-700 text-white border border-slate-600 focus:border-purple-500 focus:outline-none transition"
+                            required
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-300 font-semibold mb-2">
+                            <i class="fas fa-envelope mr-2"></i>邮箱地址
+                        </label>
+                        <input 
+                            type="email" 
+                            id="registerEmail"
+                            placeholder="example@company.com"
+                            class="w-full px-4 py-3 rounded-lg bg-slate-700 text-white border border-slate-600 focus:border-purple-500 focus:outline-none transition"
+                            required
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-300 font-semibold mb-2">
+                            <i class="fas fa-lock mr-2"></i>密码
+                        </label>
+                        <input 
+                            type="password" 
+                            id="registerPassword"
+                            placeholder="最少8个字符"
+                            class="w-full px-4 py-3 rounded-lg bg-slate-700 text-white border border-slate-600 focus:border-purple-500 focus:outline-none transition"
+                            required
+                        >
+                        <div class="mt-2 flex gap-1">
+                            <div class="flex-1 h-1 bg-slate-600 rounded"></div>
+                            <div class="flex-1 h-1 bg-slate-600 rounded"></div>
+                            <div class="flex-1 h-1 bg-slate-600 rounded"></div>
+                            <div class="flex-1 h-1 bg-slate-600 rounded"></div>
+                        </div>
+                        <p class="text-gray-400 text-xs mt-2">密码强度: 中等</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-300 font-semibold mb-2">
+                            <i class="fas fa-lock mr-2"></i>确认密码
+                        </label>
+                        <input 
+                            type="password" 
+                            id="registerPasswordConfirm"
+                            placeholder="再次输入密码"
+                            class="w-full px-4 py-3 rounded-lg bg-slate-700 text-white border border-slate-600 focus:border-purple-500 focus:outline-none transition"
+                            required
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-300 font-semibold mb-2">
+                            <i class="fas fa-building mr-2"></i>公司名称
+                        </label>
+                        <input 
+                            type="text" 
+                            id="registerCompany"
+                            placeholder="您的公司名称"
+                            class="w-full px-4 py-3 rounded-lg bg-slate-700 text-white border border-slate-600 focus:border-purple-500 focus:outline-none transition"
+                        >
+                    </div>
+
+                    <label class="flex items-start text-gray-400 text-sm">
+                        <input type="checkbox" id="agreeTerms" class="mr-2 w-4 h-4 mt-1" required>
+                        <span>我同意 <a href="#" class="text-purple-400 hover:text-purple-300">服务条款</a> 和 <a href="#" class="text-purple-400 hover:text-purple-300">隐私政策</a></span>
+                    </label>
+
+                    <button 
+                        type="submit"
+                        class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg transition mt-6"
+                    >
+                        <i class="fas fa-user-plus mr-2"></i>创建账户
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 底部提示 -->
+        <p class="text-center text-gray-400 text-sm mt-6">
+            <i class="fas fa-shield-alt mr-2 text-green-400"></i>
+            采用企业级SSL加密保护您的数据安全
+        </p>
+    </div>
+
+    <!-- 用户中心面板（登录后显示） -->
+    <div id="profilePanel" class="hidden w-full max-w-4xl">
+        <div class="bg-slate-800 rounded-lg shadow-xl border border-slate-700 overflow-hidden">
+            <!-- 个人信息头部 -->
+            <div class="bg-gradient-to-r from-purple-600 to-purple-800 p-8">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-20 h-20 rounded-full bg-slate-400 flex items-center justify-center text-3xl text-white mr-6">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div>
+                            <h1 id="profileName" class="text-3xl font-bold text-white">用户名</h1>
+                            <p id="profileEmail" class="text-purple-200">user@company.com</p>
+                        </div>
+                    </div>
+                    <button id="logoutBtn" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition">
+                        <i class="fas fa-sign-out-alt mr-2"></i>登出
+                    </button>
+                </div>
+            </div>
+
+            <!-- 选项卡 -->
+            <div class="border-b border-slate-700 bg-slate-900 flex">
+                <button class="profile-tab flex-1 py-4 px-6 font-semibold text-white border-b-2 border-purple-500 bg-slate-800 cursor-pointer transition" data-tab="overview">
+                    <i class="fas fa-home mr-2"></i>概览
+                </button>
+                <button class="profile-tab flex-1 py-4 px-6 font-semibold text-gray-400 border-b-2 border-transparent hover:text-white cursor-pointer transition" data-tab="account">
+                    <i class="fas fa-cog mr-2"></i>账户设置
+                </button>
+                <button class="profile-tab flex-1 py-4 px-6 font-semibold text-gray-400 border-b-2 border-transparent hover:text-white cursor-pointer transition" data-tab="history">
+                    <i class="fas fa-history mr-2"></i>诊断历史
+                </button>
+                <button class="profile-tab flex-1 py-4 px-6 font-semibold text-gray-400 border-b-2 border-transparent hover:text-white cursor-pointer transition" data-tab="subscription">
+                    <i class="fas fa-credit-card mr-2"></i>订阅管理
+                </button>
+            </div>
+
+            <!-- 内容区 -->
+            <div class="p-8">
+                <!-- 概览 -->
+                <div id="overview-tab" class="tab-content">
+                    <h2 class="text-2xl font-bold text-white mb-6">账户概览</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                        <div class="bg-slate-700 rounded-lg p-4 text-center">
+                            <div class="text-3xl font-bold text-blue-400 mb-2">42</div>
+                            <div class="text-gray-400">诊断次数</div>
+                        </div>
+                        <div class="bg-slate-700 rounded-lg p-4 text-center">
+                            <div class="text-3xl font-bold text-green-400 mb-2">12</div>
+                            <div class="text-gray-400">创建报告</div>
+                        </div>
+                        <div class="bg-slate-700 rounded-lg p-4 text-center">
+                            <div class="text-3xl font-bold text-purple-400 mb-2">325GB</div>
+                            <div class="text-gray-400">已用存储</div>
+                        </div>
+                        <div class="bg-slate-700 rounded-lg p-4 text-center">
+                            <div class="text-3xl font-bold text-yellow-400 mb-2">Pro</div>
+                            <div class="text-gray-400">订阅计划</div>
+                        </div>
+                    </div>
+
+                    <h3 class="text-xl font-bold text-white mb-4">最近活动</h3>
+                    <div class="space-y-3">
+                        <div class="bg-slate-700 rounded-lg p-4 flex items-center justify-between">
+                            <div class="flex items-center">
+                                <i class="fas fa-check-circle text-green-400 mr-3"></i>
+                                <div>
+                                    <div class="text-white font-semibold">轴承故障诊断</div>
+                                    <div class="text-gray-400 text-sm">2小时前</div>
+                                </div>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-500"></i>
+                        </div>
+                        <div class="bg-slate-700 rounded-lg p-4 flex items-center justify-between">
+                            <div class="flex items-center">
+                                <i class="fas fa-download text-blue-400 mr-3"></i>
+                                <div>
+                                    <div class="text-white font-semibold">下载报告 (PDF)</div>
+                                    <div class="text-gray-400 text-sm">昨天</div>
+                                </div>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-500"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 账户设置 -->
+                <div id="account-tab" class="tab-content hidden">
+                    <h2 class="text-2xl font-bold text-white mb-6">账户设置</h2>
+                    <div class="space-y-6">
+                        <div class="border-b border-slate-700 pb-6">
+                            <label class="block text-white font-semibold mb-3">用户名</label>
+                            <input type="text" value="john_engineer" class="w-full px-4 py-2 rounded-lg bg-slate-700 text-white border border-slate-600 focus:border-purple-500">
+                        </div>
+                        <div class="border-b border-slate-700 pb-6">
+                            <label class="block text-white font-semibold mb-3">邮箱地址</label>
+                            <input type="email" value="john@company.com" class="w-full px-4 py-2 rounded-lg bg-slate-700 text-white border border-slate-600 focus:border-purple-500">
+                        </div>
+                        <div class="border-b border-slate-700 pb-6">
+                            <label class="block text-white font-semibold mb-3">密码</label>
+                            <button class="text-purple-400 hover:text-purple-300 font-semibold">修改密码</button>
+                        </div>
+                        <div>
+                            <label class="flex items-center text-gray-300">
+                                <input type="checkbox" checked class="mr-3 w-4 h-4">
+                                启用两步验证
+                            </label>
+                        </div>
+                        <button class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition">保存更改</button>
+                    </div>
+                </div>
+
+                <!-- 诊断历史 -->
+                <div id="history-tab" class="tab-content hidden">
+                    <h2 class="text-2xl font-bold text-white mb-6">诊断历史</h2>
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="border-b border-slate-700">
+                                <th class="py-3 px-4 text-gray-300">诊断ID</th>
+                                <th class="py-3 px-4 text-gray-300">设备</th>
+                                <th class="py-3 px-4 text-gray-300">结果</th>
+                                <th class="py-3 px-4 text-gray-300">日期</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b border-slate-700 hover:bg-slate-700">
+                                <td class="py-3 px-4 text-white">DIAG-001</td>
+                                <td class="py-3 px-4 text-gray-300">轴承A</td>
+                                <td class="py-3 px-4"><span class="text-green-400">正常</span></td>
+                                <td class="py-3 px-4 text-gray-400">2026-03-22</td>
+                            </tr>
+                            <tr class="border-b border-slate-700 hover:bg-slate-700">
+                                <td class="py-3 px-4 text-white">DIAG-002</td>
+                                <td class="py-3 px-4 text-gray-300">泵B</td>
+                                <td class="py-3 px-4"><span class="text-yellow-400">警告</span></td>
+                                <td class="py-3 px-4 text-gray-400">2026-03-21</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 订阅管理 -->
+                <div id="subscription-tab" class="tab-content hidden">
+                    <h2 class="text-2xl font-bold text-white mb-6">订阅管理</h2>
+                    <div class="bg-slate-700 rounded-lg p-6 mb-6 border-l-4 border-purple-500">
+                        <div class="flex justify-between items-center mb-4">
+                            <div>
+                                <h3 class="text-xl font-bold text-white">Pro计划</h3>
+                                <p class="text-gray-400">¥299/月</p>
+                            </div>
+                            <span class="bg-green-600 text-white px-3 py-1 rounded-full text-sm">激活中</span>
+                        </div>
+                        <div class="text-gray-300 mb-4">
+                            <p>✓ 无限诊断次数</p>
+                            <p>✓ 高级报告</p>
+                            <p>✓ 优先支持</p>
+                        </div>
+                        <p class="text-gray-400 text-sm">下次续费日期: 2026-04-22</p>
+                    </div>
+                    <button class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded-lg transition mr-3">修改订阅</button>
+                    <button class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition">取消订阅</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 选项卡切换
+        document.getElementById('loginTab').addEventListener('click', () => {
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('loginTab').classList.add('border-purple-500', 'bg-slate-800');
+            document.getElementById('loginTab').classList.remove('text-gray-400', 'border-transparent');
+            document.getElementById('registerTab').classList.remove('border-purple-500', 'bg-slate-800');
+            document.getElementById('registerTab').classList.add('text-gray-400', 'border-transparent');
+        });
+
+        document.getElementById('registerTab').addEventListener('click', () => {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registerForm').classList.remove('hidden');
+            document.getElementById('loginTab').classList.remove('border-purple-500', 'bg-slate-800');
+            document.getElementById('loginTab').classList.add('text-gray-400', 'border-transparent');
+            document.getElementById('registerTab').classList.add('border-purple-500', 'bg-slate-800');
+            document.getElementById('registerTab').classList.remove('text-gray-400', 'border-transparent');
+        });
+
+        // 登录提交
+        document.getElementById('loginFormElement').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            document.getElementById('profileName').textContent = email.split('@')[0];
+            document.getElementById('profileEmail').textContent = email;
+            document.getElementById('authPanel').classList.add('hidden');
+            document.getElementById('profilePanel').classList.remove('hidden');
+        });
+
+        // 登出
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            document.getElementById('authPanel').classList.remove('hidden');
+            document.getElementById('profilePanel').classList.add('hidden');
+            document.getElementById('loginFormElement').reset();
+        });
+
+        // 个人中心选项卡
+        document.querySelectorAll('.profile-tab').forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                const tabName = e.target.closest('button').dataset.tab;
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
+                document.getElementById(tabName + '-tab').classList.remove('hidden');
+                document.querySelectorAll('.profile-tab').forEach(t => {
+                    t.classList.remove('border-purple-500', 'bg-slate-800');
+                    t.classList.add('text-gray-400', 'border-transparent');
+                });
+                e.target.closest('button').classList.add('border-purple-500', 'bg-slate-800');
+                e.target.closest('button').classList.remove('text-gray-400', 'border-transparent');
+            });
+        });
+
+        // 注册提交
+        document.getElementById('registerFormElement').addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('注册成功! 请登录');
+            document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('loginForm').classList.remove('hidden');
+        });
+    </script>
+<script>window.parent.postMessage({ action: "ready" }, "*"); 
+ 
+window.console = new Proxy(console, {
+  get(target, prop) {
+    if (['log', 'warn', 'error'].includes(prop)) {
+      return new Proxy(target[prop], {
+        apply(fn, thisArg, args) {
+          fn.apply(thisArg, args);
+          window.parent.postMessage({ action: 'console', 
+            type: prop, 
+            args: args.map((arg) => {
+              try {
+                return JSON.stringify(arg).replace(/^["']|["']$/g, '');
+              } catch (e) {
+                return arg;
+              }
+            }) 
+          }, '*');
+        }
+      });
+    }
+    return target[prop];
+  }
+});
+</script></body>
+</html>

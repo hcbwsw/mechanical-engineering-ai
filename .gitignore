@@ -1,0 +1,10 @@
+logs/*.log
+demo_data.json
+
+# 本地密钥与虚拟环境（勿提交）
+.env
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.DS_Store

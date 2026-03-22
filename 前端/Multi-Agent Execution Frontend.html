@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Agent诊断执行系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .agent-processing {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .progress-bar {
+            animation: slideRight 1s ease-in-out;
+        }
+        @keyframes slideRight {
+            from { width: 0; }
+        }
+        .success-check {
+            animation: checkmark 0.6s ease-out;
+        }
+        @keyframes checkmark {
+            0% { transform: scale(0); opacity: 0; }
+            70% { transform: scale(1.15); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div class="min-h-screen py-8 px-4">
+        <div class="max-w-7xl mx-auto">
+            <!-- 头部 -->
+            <div class="text-center mb-12">
+                <h1 class="text-4xl font-bold text-white mb-3">
+                    <i class="fas fa-robot mr-3 text-purple-400"></i>Multi-Agent诊断系统
+                </h1>
+                <p class="text-gray-400">4个专业Agent协作进行深度分析</p>
+            </div>
+
+            <!-- 诊断输入 -->
+            <div class="bg-slate-800 rounded-lg shadow-xl p-8 mb-8 border border-slate-700">
+                <h2 class="text-2xl font-bold text-white mb-6">
+                    <i class="fas fa-cogs mr-2"></i>诊断配置
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <!-- 诊断ID -->
+                    <div>
+                        <label class="block text-white font-semibold mb-3">诊断ID</label>
+                        <input 
+                            type="text" 
+                            id="diagnosisId"
+                            placeholder="DIAG-1774858433-1748X"
+                            class="w-full px-4 py-3 rounded-lg bg-slate-700 text-white border border-slate-600 focus:border-purple-500 focus:outline-none"
+                        >
+                    </div>
+
+                    <!-- 分析深度 -->
+                    <div>
+                        <label class="block text-white font-semibold mb-3">分析深度</label>
+                        <select id="analysisDepth" class="w-full px-4 py-3 rounded-lg bg-slate-700 text-white border border-slate-600 focus:border-purple-500">
+                            <option value="basic">基础分析 (快速)</option>
+                            <option value="standard">标准分析 (推荐)</option>
+                            <option value="deep">深度分析 (详细)</option>
+                            <option value="expert">专家级 (全面)</option>
+                        </select>
+                    </div>
+
+                    <!-- Agent选择 -->
+                    <div>
+                        <label class="block text-white font-semibold mb-3">启用Agent</label>
+                        <div class="space-y-2">
+                            <label class="flex items-center text-gray-300">
+                                <input type="checkbox" id="agentValidator" checked class="mr-3 w-4 h-4"> 数据验证Agent
+                            </label>
+                            <label class="flex items-center text-gray-300">
+                                <input type="checkbox" id="agentPattern" checked class="mr-3 w-4 h-4"> 模式识别Agent
+                            </label>
+                            <label class="flex items-center text-gray-300">
+                                <input type="checkbox" id="agentRisk" checked class="mr-3 w-4 h-4"> 风险评估Agent
+                            </label>
+                            <label class="flex items-center text-gray-300">
+                                <input type="checkbox" id="agentAction" checked class="mr-3 w-4 h-4"> 行动推荐Agent
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 高级选项 -->
+                    <div>
+                        <label class="block text-white font-semibold mb-3">高级选项</label>
+                        <div class="space-y-2">
+                            <label class="flex items-center text-gray-300">
+                                <input type="checkbox" id="historicalAnalysis" checked class="mr-3 w-4 h-4"> 历史趋势分析
+                            </label>
+                            <label class="flex items-center text-gray-300">
+                                <input type="checkbox" id="compareBaseline" checked class="mr-3 w-4 h-4"> 对比基准值
+                            </label>
+                            <label class="flex items-center text-gray-300">
+                                <input type="checkbox" id="generateReport" class="mr-3 w-4 h-4"> 生成详细报告
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 执行按钮 -->
+                <div class="flex gap-3">
+                    <button id="executeBtn" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 px-6 rounded-lg transition flex items-center justify-center text-lg">
+                        <i class="fas fa-play mr-3"></i>启动分析
+                    </button>
+                    <button id="stopBtn" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-6 rounded-lg transition flex items-center justify-center text-lg disabled opacity-50">
+                        <i class="fas fa-stop mr-3"></i>停止分析
+                    </button>
+                </div>
+            </div>
+
+            <!-- Agent执行面板 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <!-- Agent 1: 数据验证 -->
+                <div class="agent-card bg-slate-800 rounded-lg shadow-xl p-6 border border-slate-700">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-white flex items-center">
+                            <i class="fas fa-check-circle text-green-400 mr-3"></i>数据验证Agent
+                        </h3>
+                        <span class="agent-status-1 bg-slate-700 px-3 py-1 rounded-full text-sm text-gray-300">待启动</span>
+                    </div>
+                    <div class="bg-slate-700 rounded-lg p-4 mb-4">
+                        <div class="progress-bar bg-green-500 h-2 rounded-full" style="width: 0%"></div>
+                        <p class="text-gray-400 text-sm mt-3">验证诊断数据的完整性和有效性...</p>
+                    </div>
+                    <div class="text-sm text-gray-400">
+                        <div>数据完整性: <span class="text-green-400 font-semibold">100%</span></div>
+                        <div>异常检测: <span class="text-yellow-400 font-semibold">0项</span></div>
+                    </div>
+                </div>
+
+                <!-- Agent 2: 模式识别 -->
+                <div class="agent-card bg-slate-800 rounded-lg shadow-xl p-6 border border-slate-700">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-white flex items-center">
+                            <i class="fas fa-brain text-blue-400 mr-3"></i>模式识别Agent
+                        </h3>
+                        <span class="agent-status-2 bg-slate-700 px-3 py-1 rounded-full text-sm text-gray-300">待启动</span>
+                    </div>
+                    <div class="bg-slate-700 rounded-lg p-4 mb-4">
+                        <div class="progress-bar bg-blue-500 h-2 rounded-full" style="width: 0%"></div>
+                        <p class="text-gray-400 text-sm mt-3">分析故障特征和异常模式...</p>
+                    </div>
+                    <div class="text-sm text-gray-400">
+                        <div>检测到故障: <span class="text-red-400 font-semibold">未检测</span></div>
+                        <div>相似案例: <span class="text-blue-400 font-semibold">0个</span></div>
+                    </div>
+                </div>
+
+                <!-- Agent 3: 风险评估 -->
+                <div class="agent-card bg-slate-800 rounded-lg shadow-xl p-6 border border-slate-700">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-white flex items-center">
+                            <i class="fas fa-exclamation-triangle text-orange-400 mr-3"></i>风险评估Agent
+                        </h3>
+                        <span class="agent-status-3 bg-slate-700 px-3 py-1 rounded-full text-sm text-gray-300">待启动</span>
+                    </div>
+                    <div class="bg-slate-700 rounded-lg p-4 mb-4">
+                        <div class="progress-bar bg-orange-500 h-2 rounded-full" style="width: 0%"></div>
+                        <p class="text-gray-400 text-sm mt-3">评估设备故障风险等级...</p>
+                    </div>
+                    <div class="text-sm text-gray-400">
+                        <div>风险等级: <span class="text-orange-400 font-semibold">未评估</span></div>
+                        <div>失效概率: <span class="text-gray-400 font-semibold">0%</span></div>
+                    </div>
+                </div>
+
+                <!-- Agent 4: 行动推荐 -->
+                <div class="agent-card bg-slate-800 rounded-lg shadow-xl p-6 border border-slate-700">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-white flex items-center">
+                            <i class="fas fa-lightbulb text-yellow-400 mr-3"></i>行动推荐Agent
+                        </h3>
+                        <span class="agent-status-4 bg-slate-700 px-3 py-1 rounded-full text-sm text-gray-300">待启动</span>
+                    </div>
+                    <div class="bg-slate-700 rounded-lg p-4 mb-4">
+                        <div class="progress-bar bg-yellow-500 h-2 rounded-full" style="width: 0%"></div>
+                        <p class="text-gray-400 text-sm mt-3">生成维护和保养建议...</p>
+                    </div>
+                    <div class="text-sm text-gray-400">
+                        <div>推荐数量: <span class="text-yellow-400 font-semibold">0项</span></div>
+                        <div>优先级: <span class="text-gray-400 font-semibold">-</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 综合结果 -->
+            <div id="resultsContainer" class="hidden bg-slate-800 rounded-lg shadow-xl p-8 border border-slate-700">
+                <h2 class="text-2xl font-bold text-white mb-6">
+                    <i class="fas fa-chart-line mr-2"></i>综合分析结果
+                </h2>
+
+                <!-- 总体评分 -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                    <div class="bg-slate-700 rounded-lg p-4 text-center">
+                        <div class="text-4xl font-bold text-purple-400 mb-2">8.7</div>
+                        <div class="text-gray-400">整体健康评分</div>
+                    </div>
+                    <div class="bg-slate-700 rounded-lg p-4 text-center">
+                        <div class="text-4xl font-bold text-green-400 mb-2">低</div>
+                        <div class="text-gray-400">风险等级</div>
+                    </div>
+                    <div class="bg-slate-700 rounded-lg p-4 text-center">
+                        <div class="text-4xl font-bold text-blue-400 mb-2">92%</div>
+                        <div class="text-gray-400">可靠性预测</div>
+                    </div>
+                    <div class="bg-slate-700 rounded-lg p-4 text-center">
+                        <div class="text-4xl font-bold text-yellow-400 mb-2">0.5年</div>
+                        <div class="text-gray-400">预测寿命</div>
+                    </div>
+                </div>
+
+                <!-- 行动建议 -->
+                <div>
+                    <h3 class="text-xl font-bold text-white mb-4">推荐维护措施</h3>
+                    <div class="space-y-3">
+                        <div class="bg-slate-700 rounded-lg p-4 border-l-4 border-green-500">
+                            <div class="flex items-start">
+                                <i class="fas fa-check-circle text-green-400 mr-3 mt-1"></i>
+                                <div>
+                                    <div class="text-white font-semibold">定期润滑保养</div>
+                                    <div class="text-gray-400 text-sm">每250小时更换一次润滑油，确保设备正常运行</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-slate-700 rounded-lg p-4 border-l-4 border-yellow-500">
+                            <div class="flex items-start">
+                                <i class="fas fa-exclamation-circle text-yellow-400 mr-3 mt-1"></i>
+                                <div>
+                                    <div class="text-white font-semibold">月度检测计划</div>
+                                    <div class="text-gray-400 text-sm">建议在下次计划维护时进行详细的状态检测</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="mt-6 w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg transition">
+                    <i class="fas fa-download mr-2"></i>导出完整报告
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const agents = [
+            { id: 1, name: '数据验证', duration: 2000, statusClass: 'agent-status-1' },
+            { id: 2, name: '模式识别', duration: 3000, statusClass: 'agent-status-2' },
+            { id: 3, name: '风险评估', duration: 2500, statusClass: 'agent-status-3' },
+            { id: 4, name: '行动推荐', duration: 2000, statusClass: 'agent-status-4' }
+        ];
+
+        let isExecuting = false;
+
+        document.getElementById('executeBtn').addEventListener('click', startExecution);
+        document.getElementById('stopBtn').addEventListener('click', stopExecution);
+
+        function startExecution() {
+            if (isExecuting) return;
+
+            const diagnosisId = document.getElementById('diagnosisId').value.trim();
+            if (!diagnosisId) {
+                alert('请输入诊断ID');
+                return;
+            }
+
+            isExecuting = true;
+            document.getElementById('executeBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
+            document.getElementById('resultsContainer').classList.add('hidden');
+
+            // 获取启用的Agent
+            const enabledAgents = agents.filter(agent => {
+                const checkbox = document.getElementById(`agent${agent.id === 1 ? 'Validator' : agent.id === 2 ? 'Pattern' : agent.id === 3 ? 'Risk' : 'Action'}`);
+                return checkbox.checked;
+            });
+
+            // 顺序执行Agent
+            let agentIndex = 0;
+            const executeNextAgent = () => {
+                if (agentIndex >= enabledAgents.length || !isExecuting) {
+                    if (isExecuting) {
+                        showResults();
+                        isExecuting = false;
+                        document.getElementById('executeBtn').disabled = false;
+                        document.getElementById('stopBtn').disabled = true;
+                    }
+                    return;
+                }
+
+                const agent = enabledAgents[agentIndex];
+                executeAgent(agent, () => {
+                    agentIndex++;
+                    setTimeout(executeNextAgent, 500);
+                });
+            };
+
+            executeNextAgent();
+        }
+
+        function executeAgent(agent, callback) {
+            const statusElement = document.querySelector(`.${agent.statusClass}`);
+            const progressBar = document.querySelector(`.agent-card:nth-child(${agent.id}) .progress-bar`);
+
+            statusElement.textContent = '执行中...';
+            statusElement.classList.add('agent-processing');
+
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 40;
+                if (progress > 100) progress = 100;
+                progressBar.style.width = progress + '%';
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    statusElement.textContent = '完成';
+                    statusElement.classList.remove('agent-processing');
+                    statusElement.classList.add('text-green-400');
+                    statusElement.innerHTML = '<i class="fas fa-check-circle mr-1"></i>完成';
+                    callback();
+                }
+            }, 300);
+        }
+
+        function stopExecution() {
+            isExecuting = false;
+            document.getElementById('executeBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            alert('分析已停止');
+        }
+
+        function showResults() {
+            document.getElementById('resultsContainer').classList.remove('hidden');
+            document.getElementById('resultsContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    </script>
+<script>window.parent.postMessage({ action: "ready" }, "*"); 
+ 
+window.console = new Proxy(console, {
+  get(target, prop) {
+    if (['log', 'warn', 'error'].includes(prop)) {
+      return new Proxy(target[prop], {
+        apply(fn, thisArg, args) {
+          fn.apply(thisArg, args);
+          window.parent.postMessage({ action: 'console', 
+            type: prop, 
+            args: args.map((arg) => {
+              try {
+                return JSON.stringify(arg).replace(/^["']|["']$/g, '');
+              } catch (e) {
+                return arg;
+              }
+            }) 
+          }, '*');
+        }
+      });
+    }
+    return target[prop];
+  }
+});
+</script></body>
+</html>

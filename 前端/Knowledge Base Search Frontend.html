@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>机械工程知识库搜索系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .search-result-enter {
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .highlight { background-color: #fef3c7; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div class="min-h-screen py-8 px-4">
+        <div class="max-w-6xl mx-auto">
+            <!-- 头部 -->
+            <div class="text-center mb-12">
+                <h1 class="text-4xl font-bold text-white mb-3">
+                    <i class="fas fa-book mr-3 text-blue-400"></i>知识库搜索系统
+                </h1>
+                <p class="text-gray-400">20万+ 条工程知识与技术文档</p>
+            </div>
+
+            <!-- 搜索区 -->
+            <div class="bg-slate-800 rounded-lg shadow-xl p-8 mb-8 border border-slate-700">
+                <div class="space-y-4">
+                    <!-- 搜索框 -->
+                    <div>
+                        <label class="block text-white font-semibold mb-3">
+                            <i class="fas fa-search mr-2"></i>搜索知识库
+                        </label>
+                        <input 
+                            type="text" 
+                            id="searchQuery"
+                            placeholder="例如：轴承故障诊断、振动分析、润滑油压力..."
+                            class="w-full px-4 py-3 rounded-lg bg-slate-700 text-white border border-slate-600 focus:border-blue-500 focus:outline-none"
+                        >
+                    </div>
+
+                    <!-- 搜索选项 -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-white text-sm font-semibold mb-2">关键词类型</label>
+                            <select id="keywordType" class="w-full px-3 py-2 rounded-lg bg-slate-700 text-white border border-slate-600 focus:border-blue-500">
+                                <option value="all">全部</option>
+                                <option value="failure_mode">故障模式</option>
+                                <option value="diagnostic_method">诊断方法</option>
+                                <option value="maintenance_procedure">维护流程</option>
+                                <option value="safety_standard">安全标准</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-white text-sm font-semibold mb-2">关联设备</label>
+                            <select id="equipmentType" class="w-full px-3 py-2 rounded-lg bg-slate-700 text-white border border-slate-600 focus:border-blue-500">
+                                <option value="">全部</option>
+                                <option value="bearing">轴承</option>
+                                <option value="pump">泵</option>
+                                <option value="motor">电机</option>
+                                <option value="gearbox">齿轮箱</option>
+                                <option value="compressor">压缩机</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-white text-sm font-semibold mb-2">最相关度</label>
+                            <input type="range" id="relevanceThreshold" min="0" max="100" value="50" class="w-full">
+                            <span id="relevanceValue" class="text-gray-400 text-xs mt-1">50%</span>
+                        </div>
+                    </div>
+
+                    <!-- 搜索按钮 -->
+                    <div class="flex gap-3 pt-4">
+                        <button id="searchBtn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition flex items-center justify-center">
+                            <i class="fas fa-search mr-2"></i>搜索
+                        </button>
+                        <button id="clearBtn" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-4 rounded-lg transition">
+                            <i class="fas fa-redo mr-2"></i>清空
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 搜索统计 -->
+            <div id="statsContainer" class="hidden bg-slate-800 rounded-lg shadow-xl p-6 mb-8 border border-slate-700">
+                <div class="grid grid-cols-4 gap-4 text-center">
+                    <div>
+                        <div class="text-3xl font-bold text-blue-400" id="resultCount">0</div>
+                        <div class="text-gray-400 text-sm">找到结果</div>
+                    </div>
+                    <div>
+                        <div class="text-3xl font-bold text-green-400" id="avgRelevance">0%</div>
+                        <div class="text-gray-400 text-sm">平均相关度</div>
+                    </div>
+                    <div>
+                        <div class="text-3xl font-bold text-purple-400" id="searchTime">0ms</div>
+                        <div class="text-gray-400 text-sm">搜索耗时</div>
+                    </div>
+                    <div>
+                        <div class="text-3xl font-bold text-yellow-400" id="topCategory">-</div>
+                        <div class="text-gray-400 text-sm">热门分类</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 搜索结果 -->
+            <div id="resultsContainer" class="space-y-4">
+                <!-- 动态加载的结果 -->
+            </div>
+
+            <!-- 无结果提示 -->
+            <div id="noResultsMessage" class="hidden text-center py-12">
+                <i class="fas fa-inbox text-gray-600 text-5xl mb-4"></i>
+                <p class="text-gray-400 text-lg">输入搜索词进行查询</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 模拟知识库数据
+        const knowledgeBase = [
+            {
+                id: 'KB001',
+                title: '滚动轴承故障诊断完全指南',
+                category: 'failure_mode',
+                equipment: 'bearing',
+                content: '轴承是旋转机械中最常见的故障部件。通过振动分析、温度监测和声学信号可以有效诊断轴承故障...',
+                relevance: 0.95,
+                timestamp: '2026-03-15',
+                tags: ['轴承', '故障诊断', '振动分析']
+            },
+            {
+                id: 'KB002',
+                title: '高频振动特征识别方法',
+                category: 'diagnostic_method',
+                equipment: 'bearing',
+                content: '高频包络分析是现代轴承诊断的核心技术。通过FFT变换和带通滤波提取特征频率...',
+                relevance: 0.88,
+                timestamp: '2026-03-10',
+                tags: ['振动', '频域分析', '诊断方法']
+            },
+            {
+                id: 'KB003',
+                title: '泵密封圈泄漏检测标准',
+                category: 'safety_standard',
+                equipment: 'pump',
+                content: '根据ISO标准，泵密封泄漏率超过0.5ml/min时应立即停机维修。压力监测是最有效的检测方式...',
+                relevance: 0.82,
+                timestamp: '2026-03-08',
+                tags: ['泵', '密封', '检测标准']
+            },
+            {
+                id: 'KB004',
+                title: '电机绕组绝缘老化评估',
+                category: 'diagnostic_method',
+                equipment: 'motor',
+                content: '电机绕组绝缘寿命与温度密切相关。每升高10°C，寿命缩短一半。实时温度监测至关重要...',
+                relevance: 0.79,
+                timestamp: '2026-03-05',
+                tags: ['电机', '绝缘', '老化']
+            },
+            {
+                id: 'KB005',
+                title: '齿轮箱噪音源识别技术',
+                category: 'diagnostic_method',
+                equipment: 'gearbox',
+                content: '齿轮啮合噪音、轴承噪音和齿轮磨损噪音频域特征显著不同。应用小波变换可精确识别...',
+                relevance: 0.85,
+                timestamp: '2026-03-03',
+                tags: ['齿轮箱', '噪音', '小波分析']
+            },
+            {
+                id: 'KB006',
+                title: '压缩机定期维护检查清单',
+                category: 'maintenance_procedure',
+                equipment: 'compressor',
+                content: '每周检查：冷却水温、油位、压力；每月检查：油质分析、滤芯状况；每年：大修和性能测试...',
+                relevance: 0.76,
+                timestamp: '2026-02-28',
+                tags: ['压缩机', '维护', '检查清单']
+            }
+        ];
+
+        // 事件监听
+        document.getElementById('searchBtn').addEventListener('click', performSearch);
+        document.getElementById('clearBtn').addEventListener('click', clearSearch);
+        document.getElementById('searchQuery').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') performSearch();
+        });
+        document.getElementById('relevanceThreshold').addEventListener('input', (e) => {
+            document.getElementById('relevanceValue').textContent = e.target.value + '%';
+        });
+
+        function performSearch() {
+            const query = document.getElementById('searchQuery').value.trim();
+            const keywordType = document.getElementById('keywordType').value;
+            const equipmentType = document.getElementById('equipmentType').value;
+            const relevanceThreshold = parseInt(document.getElementById('relevanceThreshold').value) / 100;
+
+            if (!query) {
+                alert('请输入搜索词');
+                return;
+            }
+
+            const startTime = performance.now();
+
+            // 搜索逻辑
+            let results = knowledgeBase.filter(item => {
+                const queryMatch = item.title.includes(query) || item.content.includes(query) || 
+                                   item.tags.some(tag => tag.includes(query));
+                const categoryMatch = keywordType === 'all' || item.category === keywordType;
+                const equipmentMatch = !equipmentType || item.equipment === equipmentType;
+                const relevanceMatch = item.relevance >= relevanceThreshold;
+
+                return queryMatch && categoryMatch && equipmentMatch && relevanceMatch;
+            });
+
+            // 按相关度排序
+            results.sort((a, b) => b.relevance - a.relevance);
+
+            const endTime = performance.now();
+            const searchTime = Math.round(endTime - startTime);
+
+            // 显示结果
+            displayResults(results, query, searchTime);
+        }
+
+        function displayResults(results, query, searchTime) {
+            const container = document.getElementById('resultsContainer');
+            const statsContainer = document.getElementById('statsContainer');
+            const noResultsMessage = document.getElementById('noResultsMessage');
+
+            if (results.length === 0) {
+                container.innerHTML = '';
+                statsContainer.classList.add('hidden');
+                noResultsMessage.classList.remove('hidden');
+                return;
+            }
+
+            // 计算统计信息
+            const avgRelevance = Math.round(results.reduce((sum, r) => sum + r.relevance, 0) / results.length * 100);
+            const categoryCount = {};
+            results.forEach(r => {
+                categoryCount[r.equipment] = (categoryCount[r.equipment] || 0) + 1;
+            });
+            const topCategory = Object.keys(categoryCount).reduce((a, b) => 
+                categoryCount[a] > categoryCount[b] ? a : b
+            );
+
+            // 更新统计
+            document.getElementById('resultCount').textContent = results.length;
+            document.getElementById('avgRelevance').textContent = avgRelevance + '%';
+            document.getElementById('searchTime').textContent = searchTime + 'ms';
+            document.getElementById('topCategory').textContent = topCategory;
+            statsContainer.classList.remove('hidden');
+
+            // 渲染结果
+            container.innerHTML = results.map((result, index) => `
+                <div class="search-result-enter bg-slate-800 rounded-lg shadow-lg p-6 border border-slate-700 hover:border-blue-500 transition">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                                    #${index + 1}
+                                </span>
+                                <span class="bg-slate-700 text-gray-300 px-3 py-1 rounded text-xs">
+                                    ${result.category === 'failure_mode' ? '故障模式' : 
+                                      result.category === 'diagnostic_method' ? '诊断方法' :
+                                      result.category === 'maintenance_procedure' ? '维护流程' : '安全标准'}
+                                </span>
+                            </div>
+                            <h3 class="text-xl font-bold text-white mb-2">${result.title}</h3>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-3xl font-bold text-green-400">${Math.round(result.relevance * 100)}%</div>
+                            <div class="text-gray-400 text-sm">相关度</div>
+                        </div>
+                    </div>
+
+                    <p class="text-gray-300 mb-4">${result.content.substring(0, 150)}...</p>
+
+                    <div class="flex justify-between items-center">
+                        <div class="flex gap-2 flex-wrap">
+                            ${result.tags.map(tag => `
+                                <span class="bg-blue-900 text-blue-200 px-3 py-1 rounded-full text-xs">
+                                    <i class="fas fa-tag mr-1"></i>${tag}
+                                </span>
+                            `).join('')}
+                        </div>
+                        <div class="text-right text-sm text-gray-400">
+                            <div><i class="fas fa-calendar mr-1"></i>${result.timestamp}</div>
+                            <div class="text-xs mt-1">ID: ${result.id}</div>
+                        </div>
+                    </div>
+
+                    <button class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition font-semibold">
+                        <i class="fas fa-arrow-right mr-2"></i>查看详情
+                    </button>
+                </div>
+            `).join('');
+
+            noResultsMessage.classList.add('hidden');
+        }
+
+        function clearSearch() {
+            document.getElementById('searchQuery').value = '';
+            document.getElementById('keywordType').value = 'all';
+            document.getElementById('equipmentType').value = '';
+            document.getElementById('relevanceThreshold').value = 50;
+            document.getElementById('relevanceValue').textContent = '50%';
+            document.getElementById('resultsContainer').innerHTML = '';
+            document.getElementById('statsContainer').classList.add('hidden');
+            document.getElementById('noResultsMessage').classList.remove('hidden');
+        }
+    </script>
+<script>window.parent.postMessage({ action: "ready" }, "*"); 
+ 
+window.console = new Proxy(console, {
+  get(target, prop) {
+    if (['log', 'warn', 'error'].includes(prop)) {
+      return new Proxy(target[prop], {
+        apply(fn, thisArg, args) {
+          fn.apply(thisArg, args);
+          window.parent.postMessage({ action: 'console', 
+            type: prop, 
+            args: args.map((arg) => {
+              try {
+                return JSON.stringify(arg).replace(/^["']|["']$/g, '');
+              } catch (e) {
+                return arg;
+              }
+            }) 
+          }, '*');
+        }
+      });
+    }
+    return target[prop];
+  }
+});
+</script></body>
+</html>

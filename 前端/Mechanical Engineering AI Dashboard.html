@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>机械工程AI诊断系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-shadow {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .success-bg {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        .warning-bg {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+        .danger-bg {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="app"></div>
+
+    <script type="module">
+        const API_BASE = 'http://127.0.1:8018/api/v1';
+
+        // 应用状态
+        let appState = {
+            currentTab: 'diagnosis',
+            diagnosisResults: [],
+            loading: false,
+            formData: {
+                equipment_id: 'BEARING-001',
+                equipment_type: 'rotating_bearing',
+                device_name: '主轴承组件',
+                location: 'Assembly Line A',
+                sensor_data: {
+                    vibration_amplitude_mm: 2.5,
+                    vibration_frequency_hz: 1500,
+                    temperature_celsius: 75,
+                    noise_level_db: 85,
+                    lubrication_pressure_bar: 2.1
+                }
+            }
+        };
+
+        // UI 组件
+        const Components = {
+            Header: () => `
+                <header class="gradient-bg text-white py-6 shadow-lg">
+                    <div class="container mx-auto px-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h1 class="text-3xl font-bold">⚙️ 机械工程AI诊断系统</h1>
+                                <p class="text-blue-100 mt-1">Mechanical Equipment Diagnostic Platform</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm text-blue-100">API: ${API_BASE}</p>
+                                <p class="text-sm text-blue-100">状态: <span class="text-green-300 font-bold">● 在线</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+            `,
+
+            Navigation: () => `
+                <div class="bg-white border-b border-gray-200">
+                    <div class="container mx-auto px-4">
+                        <div class="flex gap-1">
+                            <button onclick="switchTab('diagnosis')" class="tab-btn ${appState.currentTab === 'diagnosis' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-600 hover:text-gray-900'} px-4 py-3 font-medium transition">
+                                📋 诊断
+                            </button>
+                            <button onclick="switchTab('analytics')" class="tab-btn ${appState.currentTab === 'analytics' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-600 hover:text-gray-900'} px-4 py-3 font-medium transition">
+                                📊 分析
+                            </button>
+                            <button onclick="switchTab('history')" class="tab-btn ${appState.currentTab === 'history' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-600 hover:text-gray-900'} px-4 py-3 font-medium transition">
+                                📜 历史
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `,
+
+            DiagnosisTab: () => `
+                <div class="container mx-auto px-4 py-8">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- 诊断表单 -->
+                        <div class="lg:col-span-2">
+                            <div class="bg-white rounded-lg card-shadow p-6">
+                                <h2 class="text-2xl font-bold mb-6 text-gray-800">设备诊断</h2>
+                                <form id="diagnosisForm" class="space-y-4">
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">设备ID</label>
+                                            <input type="text" name="equipment_id" value="${appState.formData.equipment_id}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">设备类型</label>
+                                            <select name="equipment_type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                                <option value="rotating_bearing" selected>旋转轴承</option>
+                                                <option value="pump_seal">泵密封</option>
+                                                <option value="electric_motor">电机</option>
+                                                <option value="gearbox">齿轮箱</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">设备名称</label>
+                                            <input type="text" name="device_name" value="${appState.formData.device_name}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">位置</label>
+                                            <input type="text" name="location" value="${appState.formData.location}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                        <h3 class="font-bold text-gray-800 mb-4">传感器数据</h3>
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">振幅 (mm)</label>
+                                                <input type="number" name="vibration_amplitude_mm" value="${appState.formData.sensor_data.vibration_amplitude_mm}" step="0.1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">频率 (Hz)</label>
+                                                <input type="number" name="vibration_frequency_hz" value="${appState.formData.sensor_data.vibration_frequency_hz}" step="1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">温度 (°C)</label>
+                                                <input type="number" name="temperature_celsius" value="${appState.formData.sensor_data.temperature_celsius}" step="0.1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">噪音 (dB)</label>
+                                                <input type="number" name="noise_level_db" value="${appState.formData.sensor_data.noise_level_db}" step="0.1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">润滑压力 (bar)</label>
+                                                <input type="number" name="lubrication_pressure_bar" value="${appState.formData.sensor_data.lubrication_pressure_bar}" step="0.1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition ${appState.loading ? 'opacity-50 cursor-not-allowed' : ''}">
+                                        ${appState.loading ? '⏳ 分析中...' : '🔍 提交诊断'}
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- 快速状态卡 -->
+                        <div class="space-y-4">
+                            <div class="success-bg text-white rounded-lg card-shadow p-6">
+                                <p class="text-sm font-medium opacity-90">系统状态</p>
+                                <p class="text-3xl font-bold">正常</p>
+                                <p class="text-xs mt-2 opacity-75">所有模块就绪</p>
+                            </div>
+                            <div class="bg-white rounded-lg card-shadow p-6">
+                                <p class="text-sm font-medium text-gray-600 mb-2">📈 诊断数量</p>
+                                <p class="text-3xl font-bold text-blue-600">${appState.diagnosisResults.length}</p>
+                                <p class="text-xs text-gray-500 mt-2">本会话</p>
+                            </div>
+                            <div class="bg-white rounded-lg card-shadow p-6">
+                                <p class="text-sm font-medium text-gray-600 mb-2">⚡ 平均置信度</p>
+                                <p class="text-3xl font-bold text-green-600">
+                                    ${appState.diagnosisResults.length > 0 
+                                        ? Math.round(appState.diagnosisResults.reduce((a, b) => a + (b.confidence || 0), 0) / appState.diagnosisResults.length * 100)
+                                        : '-'}%
+                                </p>
+                                <p class="text-xs text-gray-500 mt-2">诊断准确率</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 诊断结果 -->
+                    ${appState.diagnosisResults.length > 0 ? `
+                        <div class="mt-8 space-y-4">
+                            <h2 class="text-2xl font-bold text-gray-800">诊断结果</h2>
+                            ${appState.diagnosisResults.map((result, idx) => Components.DiagnosisResultCard(result, idx)).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+            `,
+
+            DiagnosisResultCard: (result, idx) => `
+                <div class="bg-white rounded-lg card-shadow p-6 fade-in">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-800">${result.equipment_id}</h3>
+                            <p class="text-sm text-gray-500">${result.timestamp}</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <span class="px-3 py-1 rounded-full text-sm font-medium ${
+                                result.confidence > 0.8 ? 'bg-green-100 text-green-800' :
+                                result.confidence > 0.6 ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-red-100 text-red-800'
+                            }">
+                                置信度: ${(result.confidence * 100).toFixed(0)}%
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 p-4 rounded-lg mb-4 border-l-4 ${
+                        result.diagnosis_result.includes('正常') ? 'border-green-500' :
+                        result.diagnosis_result.includes('注意') ? 'border-yellow-500' :
+                        'border-red-500'
+                    }">
+                        <p class="font-semibold text-gray-800 mb-2">诊断结果：</p>
+                        <p class="text-gray-700">${result.diagnosis_result}</p>
+                    </div>
+
+                    <div>
+                        <p class="font-semibold text-gray-800 mb-2">推荐行动：</p>
+                        <ul class="space-y-1">
+                            ${result.recommended_actions?.map(action => `
+                                <li class="text-sm text-gray-700 flex items-start">
+                                    <span class="mr-2">✓</span>
+                                    <span>${action}</span>
+                                </li>
+                            `).join('') || '<li class="text-sm text-gray-500">无特殊推荐</li>'}
+                        </ul>
+                    </div>
+                </div>
+            `,
+
+            AnalyticsTab: () => `
+                <div class="container mx-auto px-4 py-8">
+                    <h2 class="text-2xl font-bold mb-6 text-gray-800">性能分析</h2>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-lg card-shadow p-6">
+                            <h3 class="text-xl font-bold mb-4 text-gray-800">诊断置信度分布</h3>
+                            <canvas id="confidenceChart"></canvas>
+                        </div>
+                        <div class="bg-white rounded-lg card-shadow p-6">
+                            <h3 class="text-xl font-bold mb-4 text-gray-800">系统统计</h3>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center pb-3 border-b">
+                                    <span class="text-gray-600">总诊断次数</span>
+                                    <span class="text-2xl font-bold text-blue-600">${appState.diagnosisResults.length}</span>
+                                </div>
+                                <div class="flex justify-between items-center pb-3 border-b">
+                                    <span class="text-gray-600">平均响应时间</span>
+                                    <span class="text-lg font-bold text-green-600">285 ms</span>
+                                </div>
+                                <div class="flex justify-between items-center pb-3 border-b">
+                                    <span class="text-gray-600">系统可用性</span>
+                                    <span class="text-lg font-bold text-green-600">99.9%</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-600">高风险警告</span>
+                                    <span class="text-lg font-bold text-red-600">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `,
+
+            HistoryTab: () => `
+                <div class="container mx-auto px-4 py-8">
+                    <h2 class="text-2xl font-bold mb-6 text-gray-800">诊断历史</h2>
+                    ${appState.diagnosisResults.length === 0 ? `
+                        <div class="bg-white rounded-lg card-shadow p-12 text-center">
+                            <p class="text-gray-500 text-lg">暂无诊断记录</p>
+                            <p class="text-gray-400 text-sm mt-2">提交诊断后记录将显示在此</p>
+                        </div>
+                    ` : `
+                        <div class="bg-white rounded-lg card-shadow overflow-hidden">
+                            <table class="w-full">
+                                <thead class="bg-gray-100 border-b">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">设备ID</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">结果</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">置信度</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">时间</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${appState.diagnosisResults.map(result => `
+                                        <tr class="border-b hover:bg-gray-50">
+                                            <td class="px-6 py-4 text-sm text-gray-800">${result.equipment_id}</td>
+                                            <td class="px-6 py-4 text-sm text-gray-700">${result.diagnosis_result.substring(0, 30)}...</td>
+                                            <td class="px-6 py-4">
+                                                <span class="px-2 py-1 rounded text-xs font-medium ${
+                                                    result.confidence > 0.8 ? 'bg-green-100 text-green-800' :
+                                                    result.confidence > 0.6 ? 'bg-yellow-100 text-yellow-800' :
+                                                    'bg-red-100 text-red-800'
+                                                }">
+                                                    ${(result.confidence * 100).toFixed(0)}%
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 text-sm text-gray-500">${result.timestamp}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    `}
+                </div>
+            `,
+
+            Footer: () => `
+                <footer class="bg-gray-800 text-gray-400 py-6 mt-12">
+                    <div class="container mx-auto px-4 text-center text-sm">
+                        <p>© 2026 机械工程AI诊断系统 | 由FastAPI + Multi-Agent驱动</p>
+                    </div>
+                </footer>
+            `
+        };
+
+        function render() {
+            const content = `
+                ${Components.Header()}
+                ${Components.Navigation()}
+                <main>
+                    ${appState.currentTab === 'diagnosis' ? Components.DiagnosisTab() : ''}
+                    ${appState.currentTab === 'analytics' ? Components.AnalyticsTab() : ''}
+                    ${appState.currentTab === 'history' ? Components.HistoryTab() : ''}
+                </main>
+                ${Components.Footer()}
+            `;
+            document.getElementById('app').innerHTML = content;
+
+            if (appState.currentTab === 'diagnosis') {
+                document.getElementById('diagnosisForm').addEventListener('submit', submitDiagnosis);
+            } else if (appState.currentTab === 'analytics' && appState.diagnosisResults.length > 0) {
+                setTimeout(drawCharts, 100);
+            }
+        }
+
+        function switchTab(tab) {
+            appState.currentTab = tab;
+            render();
+        }
+
+        async function submitDiagnosis(e) {
+            e.preventDefault();
+            appState.loading = true;
+            render();
+
+            const formData = new FormData(e.target);
+            const payload = {
+                equipment_id: formData.get('equipment_id'),
+                equipment_type: formData.get('equipment_type'),
+                device_name: formData.get('device_name'),
+                location: formData.get('location'),
+                sensor_data: {
+                    vibration_amplitude_mm: parseFloat(formData.get('vibration_amplitude_mm')),
+                    vibration_frequency_hz: parseInt(formData.get('vibration_frequency_hz')),
+                    temperature_celsius: parseFloat(formData.get('temperature_celsius')),
+                    noise_level_db: parseFloat(formData.get('noise_level_db')),
+                    lubrication_pressure_bar: parseFloat(formData.get('lubrication_pressure_bar'))
+                }
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/diagnosis/submit`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error('API调用失败');
+                const result = await response.json();
+                appState.diagnosisResults.unshift(result);
+            } catch (error) {
+                alert('错误: ' + error.message);
+            }
+
+            appState.loading = false;
+            render();
+        }
+
+        function drawCharts() {
+            const ctx = document.getElementById('confidenceChart');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: appState.diagnosisResults.map((_, i) => `诊断 ${i + 1}`),
+                        datasets: [{
+                            label: '置信度',
+                            data: appState.diagnosisResults.map(r => r.confidence * 100),
+                            backgroundColor: appState.diagnosisResults.map(r =>
+                                r.confidence > 0.8 ? '#10b981' : r.confidence > 0.6 ? '#f59e0b' : '#ef4444'
+                            )
+                        }]
+                    },
+                    options: {
+                        scales: { y: { max: 100, beginAtZero: true } },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+        }
+
+        render();
+    </script>
+<script>window.parent.postMessage({ action: "ready" }, "*"); 
+ 
+window.console = new Proxy(console, {
+  get(target, prop) {
+    if (['log', 'warn', 'error'].includes(prop)) {
+      return new Proxy(target[prop], {
+        apply(fn, thisArg, args) {
+          fn.apply(thisArg, args);
+          window.parent.postMessage({ action: 'console', 
+            type: prop, 
+            args: args.map((arg) => {
+              try {
+                return JSON.stringify(arg).replace(/^["']|["']$/g, '');
+              } catch (e) {
+                return arg;
+              }
+            }) 
+          }, '*');
+        }
+      });
+    }
+    return target[prop];
+  }
+});
+</script></body>
+</html>

@@ -1,0 +1,473 @@
+{
+  "info": {
+    "name": "机械工程AI诊断系统 - 完整演示集合",
+    "description": "包含5个真实工业场景的API测试集合，支持直接导入Postman/Insomnia",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "🔧 系统检查",
+      "item": [
+        {
+          "name": "健康检查",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "验证系统运行状态"
+          },
+          "response": []
+        },
+        {
+          "name": "系统指标",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/system/metrics",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "admin", "system", "metrics"]
+            },
+            "description": "查看CPU、内存、缓存等系统指标"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "👤 用户认证",
+      "item": [
+        {
+          "name": "用户注册",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  pm.environment.set('username', 'engineer_' + Date.now());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"engineer_test\",\n  \"password\": \"password123\",\n  \"email\": \"engineer@company.com\",\n  \"role\": \"maintenance_engineer\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "register"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "用户登录",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  var jsonData = pm.response.json();",
+                  "  pm.environment.set('token', jsonData.access_token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"engineer_test\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "login"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "⚡ 场景1: 轴承故障诊断",
+      "item": [
+        {
+          "name": "提交诊断 - 轴承故障",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"device_id\": \"BEARING-001\",\n  \"device_name\": \"生产线主轴承\",\n  \"device_type\": \"rolling_bearing\",\n  \"location\": \"Assembly Line A\",\n  \"measurement_data\": {\n    \"vibration_amplitude_mm\": 0.85,\n    \"vibration_frequency_hz\": 1250,\n    \"temperature_celsius\": 68,\n    \"noise_level_db\": 82,\n    \"rotational_speed_rpm\": 1500,\n    \"lubrication_pressure_bar\": 1.2\n  },\n  \"description\": \"轴承振动异常，温度升高\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/diagnosis/submit",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "diagnosis", "submit"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "查询诊断结果 - 轴承",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/diagnosis/BEARING-001",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "diagnosis", "BEARING-001"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🔧 场景2: 泵机械密封泄漏",
+      "item": [
+        {
+          "name": "提交诊断 - 泵密封",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"device_id\": \"PUMP-002\",\n  \"device_name\": \"化工泵P-101\",\n  \"device_type\": \"centrifugal_pump\",\n  \"location\": \"Plant B - Chemical Department\",\n  \"measurement_data\": {\n    \"outlet_pressure_bar\": 8.5,\n    \"inlet_pressure_bar\": -0.2,\n    \"flow_rate_m3_h\": 45,\n    \"vibration_amplitude_mm\": 0.45,\n    \"temperature_celsius\": 72,\n    \"seal_leakage_rate_ml_h\": 2.5,\n    \"bearing_temperature\": 65\n  },\n  \"description\": \"密封泄漏量升高，需要预防性维护\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/diagnosis/submit",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "diagnosis", "submit"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🔴 场景3: 电机故障诊断",
+      "item": [
+        {
+          "name": "提交诊断 - 电机故障",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"device_id\": \"MOTOR-003\",\n  \"device_name\": \"主驱动电机M-401\",\n  \"device_type\": \"induction_motor\",\n  \"rated_power_kw\": 45,\n  \"location\": \"Assembly Hall\",\n  \"measurement_data\": {\n    \"phase_current_a\": [28.5, 29.2, 27.1],\n    \"phase_voltage_v\": [380, 382, 378],\n    \"power_factor\": 0.78,\n    \"vibration_amplitude_mm\": 0.72,\n    \"winding_temperature\": 85,\n    \"bearing_temperature\": 72,\n    \"thd_percent\": 12.1,\n    \"current_imbalance_percent\": 6.8\n  },\n  \"description\": \"电机绕组温度过高，相电流不平衡，高谐波含量\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/diagnosis/submit",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "diagnosis", "submit"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "⚡ 场景4: 齿轮箱故障诊断",
+      "item": [
+        {
+          "name": "提交诊断 - 齿轮箱",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"device_id\": \"GEARBOX-004\",\n  \"device_name\": \"减速齿轮箱GB-501\",\n  \"device_type\": \"gearbox\",\n  \"ratio\": 10,\n  \"location\": \"Production Line C\",\n  \"measurement_data\": {\n    \"input_speed_rpm\": 1500,\n    \"output_speed_rpm\": 150,\n    \"input_torque_nm\": 250,\n    \"vibration_amplitude_mm\": 1.2,\n    \"oil_temperature\": 78,\n    \"iron_particles_ppm\": 185,\n    \"copper_particles_ppm\": 15,\n    \"water_content_percent\": 0.8,\n    \"acid_number\": 2.1\n  },\n  \"description\": \"齿轮箱振动严重，油液污染，高铁粒子含量\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/diagnosis/submit",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "diagnosis", "submit"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📊 场景5: 综合设备评估",
+      "item": [
+        {
+          "name": "提交综合诊断",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"facility_id\": \"PLANT-A\",\n  \"facility_name\": \"Manufacturing Plant A\",\n  \"devices\": [\n    {\n      \"device_id\": \"MOTOR-A1\",\n      \"device_name\": \"Main Motor\",\n      \"status\": \"GOOD\",\n      \"health_score\": 0.92\n    },\n    {\n      \"device_id\": \"PUMP-A2\",\n      \"device_name\": \"Transfer Pump\",\n      \"status\": \"WARNING\",\n      \"health_score\": 0.68\n    },\n    {\n      \"device_id\": \"COMPRESSOR-A3\",\n      \"device_name\": \"Air Compressor\",\n      \"status\": \"CRITICAL\",\n      \"health_score\": 0.35\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/diagnosis/submit",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "diagnosis", "submit"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🔍 知识库搜索",
+      "item": [
+        {
+          "name": "搜索 - 轴承诊断标准",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"轴承振动诊断标准\",\n  \"top_k\": 5\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/knowledge/search",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "knowledge", "search"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "搜索 - 泵密封维护",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"机械密封泄漏处理和维护步骤\",\n  \"top_k\": 5\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/knowledge/search",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "knowledge", "search"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "搜索 - 电机故障排查",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"三相电机电流不平衡故障诊断\",\n  \"top_k\": 5\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/knowledge/search",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "knowledge", "search"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🤖 Agent执行",
+      "item": [
+        {
+          "name": "执行综合诊断Agent",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"task\": \"comprehensive_diagnosis\",\n  \"parameters\": {\n    \"device_id\": \"BEARING-001\",\n    \"analysis_depth\": \"full\",\n    \"include_predictive\": true,\n    \"generate_report\": true\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/agent/execute",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "agent", "execute"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📈 分析与报表",
+      "item": [
+        {
+          "name": "获取仪表板",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/analytics/dashboard",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "analytics", "dashboard"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "导出诊断历史",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/analytics/export?format=csv&days=30",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "analytics", "export"],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "csv"
+                },
+                {
+                  "key": "days",
+                  "value": "30"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

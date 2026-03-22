@@ -1,0 +1,15 @@
+{
+  "equipment_id": "BEARING-001",
+  "equipment_type": "rolling_bearing",
+  "symptoms": "轴承振动与温度偏高，噪声偏大",
+  "sensor_data": {
+    "vibration_amplitude_mm": 0.85,
+    "vibration_frequency_hz": 1250,
+    "temperature_celsius": 68,
+    "noise_level_db": 82,
+    "rotational_speed_rpm": 1500,
+    "lubrication_pressure_bar": 1.2,
+    "device_name": "生产线主轴承",
+    "location": "Assembly Line A"
+  }
+}
