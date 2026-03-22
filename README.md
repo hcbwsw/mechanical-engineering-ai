@@ -4,24 +4,11 @@
 
 ## 界面预览
 
-**说明：** 若 README 里只看到**灰色大块**，那是仓库里的**占位 PNG**（能加载，只是没有界面内容）。要显示真实界面，请把截图放进 `docs/screenshots/` **同名覆盖**后 `git push`。
+本仓库**不在 README 里内嵌占位图**：以前在下方放灰色 PNG，容易被误认为「图片加载失败」。
 
-GitHub 上偶发相对路径不渲染时，下面已改为 **`raw.githubusercontent.com` 绝对地址**（默认分支 `main`；若你改名请同步改 URL）。
+正确做法：在浏览器里对 **Hub / `/docs` / Dashboard** 截真图，保存到 `docs/screenshots/`（文件名与步骤见 **[docs/screenshots/README.md](docs/screenshots/README.md)**），`git push` 后，再按该文档里的 **Markdown 范例** 把 `![说明](docs/screenshots/xxx.png)` 贴回本节，GitHub 与 Cursor 预览均可正常显示。
 
-| 文件 | 说明 |
-|------|------|
-| `docs/screenshots/unified-hub.png` | 统一入口 **Unified Application Hub** |
-| `docs/screenshots/openapi-docs.png` | **Swagger** `/docs`（可替换占位图） |
-| `docs/screenshots/dashboard.png` | 诊断看板（可替换占位图） |
-
-<p align="center"><strong>统一入口 Hub</strong><br/>
-<img src="https://raw.githubusercontent.com/hcbwsw/mechanical-engineering-ai/main/docs/screenshots/unified-hub.png" alt="Unified Application Hub" width="720" /></p>
-
-<p align="center"><strong>OpenAPI /docs</strong><br/>
-<img src="https://raw.githubusercontent.com/hcbwsw/mechanical-engineering-ai/main/docs/screenshots/openapi-docs.png" alt="OpenAPI Swagger UI" width="720" /></p>
-
-<p align="center"><strong>诊断看板</strong><br/>
-<img src="https://raw.githubusercontent.com/hcbwsw/mechanical-engineering-ai/main/docs/screenshots/dashboard.png" alt="Mechanical Engineering AI Dashboard" width="720" /></p>
+**当前若尚未提交截图**：本节无大图，属正常，不是显示故障。
 
 ---
 
@@ -44,7 +31,8 @@ GitHub 上偶发相对路径不渲染时，下面已改为 **`raw.githubusercont
 │
 ├── docs/                     # 📄 说明文档（原根目录散落 .md 已归集）
 │   ├── DEPLOYMENT_GUIDE.md   # 部署与本地启动说明
-│   ├── screenshots/          # 📷 README 界面截图（PNG/JPG，见上文「界面预览」）
+│   ├── screenshots/          # 📷 界面截图目录（screenshots/README.md）
+│   │   └── README.md         # 截图命名与 README 嵌入范例
 │   ├── COMPLETE_PROJECT_INTEGRATION.md
 │   ├── 测试指南.md
 │   └── 演示测试快速指南.md
