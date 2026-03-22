@@ -1,6 +1,10 @@
 logs/*.log
 demo_data.json
 
+# start.sh / 本地 http.server 写入，勿提交
+backend.log
+前端/frontend.log
+
 # 本地密钥与虚拟环境（勿提交）
 .env
 .venv/
