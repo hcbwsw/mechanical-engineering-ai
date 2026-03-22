@@ -12,7 +12,6 @@ postman
 examples
 test_suite.py
 demo_scenarios.py
-deploy_package.py
 *.md
 .env
 .env.*

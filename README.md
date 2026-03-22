@@ -38,7 +38,6 @@ GitHub 渲染 README 里的图片时，需满足：**图片文件已提交到当
 ├── README.md                 # 本说明（入口导航）
 ├── start.sh / stop.sh / restart.sh   # Linux/macOS：一键起停（8010 API + 8080 静态前端）
 ├── main_app.py               # FastAPI 主程序（默认端口 8010）
-├── deploy_package.py         # 部署相关脚本
 ├── demo_scenarios.py         # 演示场景数据生成器（会写 demo_data.json）
 ├── test_suite.py             # HTTP 集成测试（需先启动 main_app）
 ├── requirements.txt          # 运行 main_app 的依赖
@@ -115,8 +114,6 @@ GitHub 渲染 README 里的图片时，需满足：**图片文件已提交到当
 |------|------|
 | **能本地跑演示** | 可以。`main_app.py` + `/docs` + `test_suite.py` + `前端/` 静态页能串起教学演示。 |
 | **商业上线级「完整」** | 还不到。大量接口是**模拟返回**；认证多为占位；未自带与当前目录一致的 **Dockerfile / K8s**；**Postgres / Redis** 为可选依赖，需你自建或改配置。 |
-| **`deploy_package.py`** | 实际是 **Bash 脚本**（扩展名易误解），按「理想化多目录工程 + Docker」模板编写，**与当前「单文件 main_app + 前端 HTML」结构并不一一对应**，不要指望复制粘贴就能一键发布本目录。 |
-
 若你要**严肃上线**，还需要：真实用户与权限、HTTPS、密钥与 `.env` 管理、数据库迁移、监控与日志规范、以及把前端里的 API 地址改成你的生产域名/端口等。
 
 ---
