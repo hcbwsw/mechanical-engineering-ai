@@ -4,30 +4,24 @@
 
 ## 界面预览
 
-GitHub 渲染 README 里的图片时，需满足：**图片文件已提交到当前浏览的分支**，且路径与**文件名大小写**与仓库中一致。推荐 **PNG / JPG**，文件名用英文。
+**说明：** 若 README 里只看到**灰色大块**，那是仓库里的**占位 PNG**（能加载，只是没有界面内容）。要显示真实界面，请把截图放进 `docs/screenshots/` **同名覆盖**后 `git push`。
 
-本仓库在 `docs/screenshots/` 下已放入**可显示的占位图**（纯色底，体积很小）；你可导出真实界面截图后**同名覆盖**再 `git add` + `push`，无需改 README。
+GitHub 上偶发相对路径不渲染时，下面已改为 **`raw.githubusercontent.com` 绝对地址**（默认分支 `main`；若你改名请同步改 URL）。
 
 | 文件 | 说明 |
 |------|------|
 | `docs/screenshots/unified-hub.png` | 统一入口 **Unified Application Hub** |
-| `docs/screenshots/openapi-docs.png` | **Swagger** `/docs` |
-| `docs/screenshots/dashboard.png` | 诊断看板 **Mechanical Engineering AI Dashboard** |
-
-下列使用 HTML 指定宽度，避免在 GitHub 上过宽撑破版式；若仍不显示，请确认已 push 含 `docs/screenshots/*.png`，并检查默认分支是否为 `main`。
+| `docs/screenshots/openapi-docs.png` | **Swagger** `/docs`（可替换占位图） |
+| `docs/screenshots/dashboard.png` | 诊断看板（可替换占位图） |
 
 <p align="center"><strong>统一入口 Hub</strong><br/>
-<img src="docs/screenshots/unified-hub.png" alt="Unified Application Hub" width="720" /></p>
+<img src="https://raw.githubusercontent.com/hcbwsw/mechanical-engineering-ai/main/docs/screenshots/unified-hub.png" alt="Unified Application Hub" width="720" /></p>
 
 <p align="center"><strong>OpenAPI /docs</strong><br/>
-<img src="docs/screenshots/openapi-docs.png" alt="OpenAPI Swagger UI" width="720" /></p>
+<img src="https://raw.githubusercontent.com/hcbwsw/mechanical-engineering-ai/main/docs/screenshots/openapi-docs.png" alt="OpenAPI Swagger UI" width="720" /></p>
 
 <p align="center"><strong>诊断看板</strong><br/>
-<img src="docs/screenshots/dashboard.png" alt="Mechanical Engineering AI Dashboard" width="720" /></p>
-
-**仍裂图时**可用绝对地址（将 `main` 换成你的默认分支）：  
-`https://raw.githubusercontent.com/hcbwsw/mechanical-engineering-ai/main/docs/screenshots/unified-hub.png`  
-把该 URL 放进 `![说明](URL)` 或 `<img src="..." />` 再试。
+<img src="https://raw.githubusercontent.com/hcbwsw/mechanical-engineering-ai/main/docs/screenshots/dashboard.png" alt="Mechanical Engineering AI Dashboard" width="720" /></p>
 
 ---
 
