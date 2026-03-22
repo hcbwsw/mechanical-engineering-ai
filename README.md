@@ -4,30 +4,30 @@
 
 ## 界面预览
 
-README 里**可以**放前端截图：把图片放进本仓库（例如 `docs/screenshots/`），用**相对路径**引用即可，GitHub 会直接在仓库首页渲染。
+GitHub 渲染 README 里的图片时，需满足：**图片文件已提交到当前浏览的分支**，且路径与**文件名大小写**与仓库中一致。推荐 **PNG / JPG**，文件名用英文。
 
-**建议**：用 **PNG / JPG**，文件名尽量**英文**（如 `unified-hub.png`），避免少数工具对路径编码不友好。截图分辨率宽度约 **1200～1600px** 在网页上较清晰；若单张很大，可压缩后再提交以控制仓库体积。
+本仓库在 `docs/screenshots/` 下已放入**可显示的占位图**（纯色底，体积很小）；你可导出真实界面截图后**同名覆盖**再 `git add` + `push`，无需改 README。
 
-将文件保存到 `docs/screenshots/` 下后，与下表文件名一致即可显示；也可改名，并同步修改下面 Markdown 中的路径。
-
-| 截图文件（示例） | 说明 |
-|------------------|------|
+| 文件 | 说明 |
+|------|------|
 | `docs/screenshots/unified-hub.png` | 统一入口 **Unified Application Hub** |
-| `docs/screenshots/openapi-docs.png` | **Swagger** `/docs` 接口文档 |
+| `docs/screenshots/openapi-docs.png` | **Swagger** `/docs` |
 | `docs/screenshots/dashboard.png` | 诊断看板 **Mechanical Engineering AI Dashboard** |
 
-示例写法（复制到 README 任意位置均可）：
+下列使用 HTML 指定宽度，避免在 GitHub 上过宽撑破版式；若仍不显示，请确认已 push 含 `docs/screenshots/*.png`，并检查默认分支是否为 `main`。
 
-```markdown
-![统一入口 Hub](docs/screenshots/unified-hub.png)
-![OpenAPI 文档](docs/screenshots/openapi-docs.png)
-```
+<p align="center"><strong>统一入口 Hub</strong><br/>
+<img src="docs/screenshots/unified-hub.png" alt="Unified Application Hub" width="720" /></p>
 
-添加截图文件并 `git push` 后，下列引用会显示为图片（文件尚不存在时 GitHub 上会显示裂图，可忽略直至你补全 PNG）：
+<p align="center"><strong>OpenAPI /docs</strong><br/>
+<img src="docs/screenshots/openapi-docs.png" alt="OpenAPI Swagger UI" width="720" /></p>
 
-![统一入口 Hub](docs/screenshots/unified-hub.png)
+<p align="center"><strong>诊断看板</strong><br/>
+<img src="docs/screenshots/dashboard.png" alt="Mechanical Engineering AI Dashboard" width="720" /></p>
 
-![OpenAPI /docs](docs/screenshots/openapi-docs.png)
+**仍裂图时**可用绝对地址（将 `main` 换成你的默认分支）：  
+`https://raw.githubusercontent.com/hcbwsw/mechanical-engineering-ai/main/docs/screenshots/unified-hub.png`  
+把该 URL 放进 `![说明](URL)` 或 `<img src="..." />` 再试。
 
 ---
 
@@ -36,6 +36,7 @@ README 里**可以**放前端截图：把图片放进本仓库（例如 `docs/sc
 ```
 机械工程AI系统/
 ├── README.md                 # 本说明（入口导航）
+├── start.sh / stop.sh / restart.sh   # Linux/macOS：一键起停（8010 API + 8080 静态前端）
 ├── main_app.py               # FastAPI 主程序（默认端口 8010）
 ├── deploy_package.py         # 部署相关脚本
 ├── demo_scenarios.py         # 演示场景数据生成器（会写 demo_data.json）
@@ -49,6 +50,7 @@ README 里**可以**放前端截图：把图片放进本仓库（例如 `docs/sc
 ├── .env.docker.example       # Compose 环境变量示例
 │
 ├── docs/                     # 📄 说明文档（原根目录散落 .md 已归集）
+│   ├── DEPLOYMENT_GUIDE.md   # 部署与本地启动说明
 │   ├── screenshots/          # 📷 README 界面截图（PNG/JPG，见上文「界面预览」）
 │   ├── COMPLETE_PROJECT_INTEGRATION.md
 │   ├── 测试指南.md
@@ -60,7 +62,7 @@ README 里**可以**放前端截图：把图片放进本仓库（例如 `docs/sc
 ├── postman/                  # 📮 Postman 集合（JSON，导入 Postman/Apifox）
 │   └── Mechanical-Engineering-AI-System.postman_collection.json
 │
-├── 前端/                     # 🖥 静态 HTML（建议用 http.server 打开，避免 file:// 限制 iframe）
+├── 前端/                     # 🖥 静态 HTML（见 前端/README.md；部署见 docs/DEPLOYMENT_GUIDE.md）
 │   ├── Unified Application Hub.html    # 统一入口（卡片打开各子页）
 │   ├── Mechanical Engineering AI Dashboard.html
 │   ├── Knowledge Base Search Frontend.html
@@ -78,11 +80,15 @@ README 里**可以**放前端截图：把图片放进本仓库（例如 `docs/sc
 
 | 目的 | 做法 |
 |------|------|
+| 一键前后端（推荐） | 在项目根执行 `bash start.sh` / `bash stop.sh`（见下说明与 `docs/DEPLOYMENT_GUIDE.md`） |
 | 起后端 | `cd 机械工程AI系统 && python main_app.py`（端口占用时设 `MAIN_APP_PORT`） |
 | 看接口文档 | 浏览器打开 `http://127.0.0.1:8010/docs` |
 | 跑自动化测试 | 另开终端：`python test_suite.py`（`TEST_BASE_URL` 与端口一致） |
 | 打开统一前端 | `cd 机械工程AI系统/前端 && python3 -m http.server 8080`，再开 `http://127.0.0.1:8080/Unified%20Application%20Hub.html` |
 | 生成演示 JSON | `python demo_scenarios.py`（当前目录会生成 `demo_data.json`） |
+
+**关于 `cd` 路径**：须进入**含有 `main_app.py` 和 `start.sh` 的那一层**再执行脚本。本仓库在你电脑上的示例路径：  
+`代码/new_my_project/机械工程AI系统`（绝对路径以你实际 `Documents` 等位置为准）。若教程里出现 `/path/to/...`，表示「换成你自己的目录」，不能原样复制执行。
 
 ---
 
